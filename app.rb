@@ -1,70 +1,85 @@
+# frozen_string_literal: true
+
+# Methods for the practice Game's Life
 class Game
-    def initialize (height, width)
-        @height = height
-        @width = width
-        @table = Array.new(height) { Array.new (width)}
-    end
+  def initialize(height, width)
+    @height = height
+    @width = width
+    @table = Array.new(height) { Array.new(width) }
+  end
 
-    def generate_Table
-        @height.times do |x|
-            @width.times do |y|
-                num = rand(2)
-                @table[x][y] = num
-            end
+  def generate_table
+    @height.times do |x|
+      @width.times do |y|
+        num = rand(2)
+        @table[x][y] = num
+      end
+    end
+  end
+
+  def top_neighbours(y_position, x_position)
+    top_left_neighbour = x_position.zero? || y_position.zero? ? 0 : @table[y_position - 1][x_position - 1]
+    top_middle_neighbour = y_position.zero? ? 0 : @table[y_position - 1][x_position]
+    top_right_neighbour = y_position.zero? || x_position == @width - 1 ? 0 : @table[y_position - 1][x_position + 1]
+    top_left_neighbour + top_middle_neighbour + top_right_neighbour
+  end
+
+  def middle_neighbours(y_position, x_position)
+    middle_left_neighbour = x_position.zero? ? 0 : @table[y_position][x_position - 1]
+    middle_right_neighbour = x_position == @width - 1 ? 0 : @table[y_position][x_position + 1]
+    middle_left_neighbour + middle_right_neighbour
+  end
+
+  def bottom_neighbours(y_position, x_position)
+    bottom_left_neighbour = x_position.zero? || y_position == @height - 1 ? 0 : @table[y_position + 1][x_position - 1]
+    bottom_middle_neighbour = y_position == @height - 1 ? 0 : @table[y_position + 1][x_position]
+    bottom_right_neighbour = x_position == @width - 1 || y_position == @height - 1 ? 0 : @table[y_position + 1][x_position + 1]
+    bottom_left_neighbour + bottom_middle_neighbour + bottom_right_neighbour
+  end
+
+  def neighbour_count(y_position, x_position)
+    top_neighbours(y_position,
+                   x_position) + middle_neighbours(y_position, x_position) + bottom_neighbours(y_position, x_position)
+  end
+
+  def show_table
+    (0..@height).each do |i|
+      print (@table[i]).to_s
+      print "\n"
+    end
+  end
+
+  def next_generation
+    @height.times do |y|
+      @width.times do |x|
+        nc = neighbour_count(y, x)
+        num = 0
+        if nc < 2 && @table[y][x] == 1
+          num = 0
+        elsif nc > 3 && @table[y][x] == 1
+          num = 0
+        elsif [2, 3].include?(nc) && @table[y][x] == 1
+          num = 1
+        elsif nc == 3 && (@table[y][x]).zero?
+          num = 1
         end
+        @table[y][x] = num
+      end
     end
-
-    def neighbour_Count(x_position, y_position)
-        topLeftNeighbour = if x_position == 0 || y_position == 0 then 0 else @table[x_position - 1][y_position - 1] end
-        topMiddleNeighbour = if y_position == 0 then 0 else @table[x_position][y_position - 1] end
-        topRightNeighbour = if y_position == 0 || x_position == @width then 0 else @table[x_position + 1][y_position - 1] end
-
-        middleLeftNeighbour = if x_position == 0 then 0 else @table[x_position - 1][y_position] end
-        middleRightNeighbour = if x_position == @width then 0 else @table[x_position + 1][y_position] end
-
-        bottomLeftNeighbour = if x_position == 0 || y_position == @height then 0 else @table[x_position - 1][y_position + 1] end
-        bottomMiddleNeighbour = if y_position == @height then 0 else @table[x_position][y_position + 1] end
-        bottomRightNeighbour = if x_position == @width then 0 else @table[x_position + 1][y_position + 1] end
-
-        neighbours =
-          topLeftNeighbour + topMiddleNeighbour + topRightNeighbour +
-          middleLeftNeighbour + middleRightNeighbour +
-          bottomLeftNeighbour + bottomMiddleNeighbour + bottomRightNeighbour
-
-    end
-
-    def show_Table
-        for i in (0..@height)
-            print "#{@table[i]}"
-            print "\n"
-        end
-    end
-
-    def next_Generation
-        for i in (0..@height)
-            row = []
-            for j in (0..@width)
-                nc = neighbour_Count(i,j)
-                if nc == 3
-                    row[j] = 1
-                elsif nc < 2
-                    row[j] = 0
-                elsif nc > 3 && @table[i][j] == 1
-                    row[j] = 0
-                elsif nc == 2 || nc == 3
-                    row[j] = 1
-                end
-            end
-        end
-    end
+  end
 end
 
-puts 'Ingresa la altura: '
+print 'Ingresa la altura: '
 height = gets.to_i
-puts 'Ingresa la anchura: '
+print 'Ingresa la anchura: '
 width = gets.to_i
+puts
 
 games = Game.new(height, width)
-games.generate_Table
-games.show_Table
-puts games.neighbour_Count(4,4)
+games.generate_table
+puts 'Primera generacion'
+games.show_table
+
+games.next_generation
+puts 'Segunda generacion'
+games.show_table
